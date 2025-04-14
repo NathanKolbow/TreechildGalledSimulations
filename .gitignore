@@ -1,9 +1,12 @@
 .vscode/
 
-# Simulation files
+# Condor log files
 condor/err/
 condor/log/
 condor/out/
+
+# Software files (too large)
+software/
 
 # MacOS files
 *.DS_store
