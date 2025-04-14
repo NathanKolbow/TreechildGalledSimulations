@@ -14,4 +14,4 @@ JULIA_DEPOT_PATH=$PWD ${jl} --project=. ./compile_project.jl
 
 # run the inference script
 echo "Running inference script."
-JULIA_DEPOT_PATH=$PWD ${jl} --project=. -p7 -t8 ./infer_TCG_network.jl "$@"
+JULIA_DEPOT_PATH=$PWD ${jl} --project=. -p7 ./infer_TCG_network.jl "$@"

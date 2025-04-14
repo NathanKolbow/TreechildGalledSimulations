@@ -49,7 +49,7 @@ gts = simulatecoalescent(truenet, ngt, 1);
 estgts = Array{HybridNetwork}(undef, ngt);
 
 @info "Generating true gt --> sequences --> est gts"
-tdir = joinpath("temp_dir-$(ntaxa)-$(repid)-$(ils)-$(ngt)-$(L)-$(density)-$(folder)")
+tdir = abspath("./temp_dir-$(ntaxa)-$(repid)-$(ils)-$(ngt)-$(L)-$(density)-$(folder)/")
 if isdir(tdir) rm(tdir, recursive=true) end
 mkdir(tdir);
 
@@ -57,10 +57,9 @@ if L == 0
     # No simulated gene trees, so set `estgts` to true gts as a quick hack
     estgts .= gts
 else
-    Threads.@threads for j = 1:length(gts)
-        gt = gts[j]
-        print("\r$(j) / $(ngt) inferred gene trees")
-
+    # Here, we conduct the process in batches, with 1 gene tree going through the pipeline
+    # at a time per processor allocated (say there are `np` processors allocated).
+    estgts = @distributed (vcat) for j = 1:ngt
         # 1. write gt
         gtfile = joinpath(tdir, "truegts-$(j).tre")
         seqfile = joinpath(tdir, "seq-$(j).seq")
@@ -76,13 +75,14 @@ else
         rm(seqfile)
 
         # 4. read inferred gt
-        estgts[j] = readnewick("$(iqtreeprefix).treefile")
+        estgt = readnewick("$(iqtreeprefix).treefile")
         for suffix in [".bionj", ".ckp.gz", ".log", ".model.gz", ".iqtree", ".mldist", ".treefile"]
             rm("$(iqtreeprefix)$(suffix)")
         end
+        estgt
     end
-    println()
 end
+
 
 @info "Counting qCFs."
 qstatic, _ = countquartetsintrees(estgts)
