@@ -8,6 +8,13 @@ condor/out/
 # Software files (too large)
 software/
 
+# Data files
+data/networks/treechild-galled/
+data/networks/nottreechild-galled/
+data/networks/treechild-notgalled/
+data/networks/nottreechild-notgalled/
+data/out/
+
 # MacOS files
 *.DS_store
 
