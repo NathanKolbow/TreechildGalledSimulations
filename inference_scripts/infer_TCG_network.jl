@@ -41,7 +41,7 @@ using CSV, DataFrames, PhyloCoalSimulations
 
 q::Array{Float64} = Array{Float64}(undef, binomial(ntaxa, 4), 3)    # THIS IS THE `q` THAT WILL BE USED AS INPUT
 global t0::HybridNetwork    # THIS IS THE STARTING TOPOLOGY THAT WILL BE USED
-truenet = readnewick(readlines(joinpath(@__DIR__, "../data/networks/$(folder)/processed-n$(ntaxa)-$(density)-dens.netfile"))[repid])
+truenet = readnewick(readlines(joinpath(@__DIR__, "processed-n$(ntaxa)-$(density)-dens.netfile"))[repid])
 nhyb = truenet.numhybrids
 
 @info "Generating true gene trees."

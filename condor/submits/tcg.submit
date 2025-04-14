@@ -11,7 +11,8 @@ transfer_input_files = ../compile_project.jl,       \
     ../../software/astral4_coalescent_unit,         \
     ../../software/julia-1.11.4-linux-x86_64.tar.gz,\
     ../../inference_scripts/infer_TCG_network.jl,   \
-    ../../Project.toml
+    ../../Project.toml,                             \
+    ../../data/networks/$(FOLDER)/processed-n$(NTAXA)-$(DENSITY)-dens.netfile
 
 executable = tcg.sh
 arguments = $(NTAXA) $(REPID) $(ILS) $(NGT) $(L) $(FOLDER) $(DENSITY) seq-gen iqtree3 astral4_coalescent_unit
