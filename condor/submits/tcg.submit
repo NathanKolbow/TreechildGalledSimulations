@@ -18,7 +18,7 @@ transfer_input_files = ../compile_project.jl,       \
 executable = tcg.sh
 arguments = $(NTAXA) $(REPID) $(ILS) $(NGT) $(L) $(FOLDER) $(DENSITY) seq-gen iqtree3 astral4_coalescent_unit
 
-request_cpus = 9
+request_cpus = 5
 request_memory = 64GB
 request_disk = 20GB
 
