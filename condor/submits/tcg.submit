@@ -18,10 +18,10 @@ transfer_input_files = ../compile_project.jl,       \
 executable = tcg.sh
 arguments = $(NTAXA) $(REPID) $(ILS) $(NGT) $(L) $(FOLDER) $(DENSITY) seq-gen iqtree3 astral4_coalescent_unit
 
-request_cpus = 8
-request_memory = 16GB
-request_disk = 10GB
+request_cpus = 9
+request_memory = 64GB
+request_disk = 20GB
 
-periodic_release = False
+periodic_release = True
 
 queue NTAXA,REPID,ILS,NGT,L,FOLDER,DENSITY from tcg.table

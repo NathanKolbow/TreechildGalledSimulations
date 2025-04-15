@@ -46,8 +46,6 @@ open("tcg.table", "w+") do f
                                 for _ = 1:10
                                     global ntot
                                     write(f, "$(ntaxa),$(repid),$(ils),$(ngt),$(L),treechild-galled,$(density)\n")
-                                    ntot += 1
-                                    ntot >= 50 && error("Quitting early after 50 queue.")
                                 end
                             end
                         end
