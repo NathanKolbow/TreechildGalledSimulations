@@ -12,15 +12,16 @@ transfer_input_files = ../compile_project.jl,       \
     ../../software/julia-1.11.4-linux-x86_64.tar.gz,\
     ../../inference_scripts/infer_TCG_network.jl,   \
     ../../Project.toml,                             \
+    /etc/profile.d/modules.sh,                      \
     ../../data/networks/$(FOLDER)/processed-n$(NTAXA)-$(DENSITY)-dens.netfile
 
 executable = tcg.sh
 arguments = $(NTAXA) $(REPID) $(ILS) $(NGT) $(L) $(FOLDER) $(DENSITY) seq-gen iqtree3 astral4_coalescent_unit
 
-request_cpus = 6
+request_cpus = 8
 request_memory = 16GB
 request_disk = 10GB
 
-periodic_release = True
+periodic_release = False
 
 queue NTAXA,REPID,ILS,NGT,L,FOLDER,DENSITY from tcg.table

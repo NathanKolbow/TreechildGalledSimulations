@@ -44,6 +44,22 @@ global t0::HybridNetwork    # THIS IS THE STARTING TOPOLOGY THAT WILL BE USED
 truenet = readnewick(readlines(joinpath(@__DIR__, "processed-n$(ntaxa)-$(density)-dens.netfile"))[repid])
 nhyb = truenet.numhybrids
 
+@info "Setting ILS."
+global targetmean::Float64 = ils == "low" ? 1.0 : ils == "high" ? 0.1 : error("ILS must be low or high.")
+global sumE::Float64 = 0.0
+global nE::Int = 0
+for E in truenet.edge
+    global nE, sumE
+    sumE += E.length == -1. ? 0.0 : E.length
+    nE += E.length == 1. ? 0.0 : nE
+end
+obsmean::Float64 = sumE / nE
+global refactor::Float64 = targetmean / obsmean
+for E in truenet.edge
+    global refactor
+    E.length = E.length == -1. ? -1. : E.length * refactor
+end
+
 @info "Generating true gene trees."
 gts = simulatecoalescent(truenet, ngt, 1);
 estgts = Array{HybridNetwork}(undef, ngt);
@@ -71,7 +87,7 @@ else
 
         # 3. infer gt
         iqtreeprefix = joinpath(tdir, "iqtree-$(j)")
-        run(`$(iqtree) -nt $(Threads.nthreads()) -s "$(seqfile)" -pre "$(iqtreeprefix)" -seed $(j) -quiet`)
+        run(`$(iqtree) -s "$(seqfile)" -pre "$(iqtreeprefix)" -seed $(j) -quiet`)
         rm(seqfile)
 
         # 4. read inferred gt
@@ -100,7 +116,7 @@ end
 estgtfile = joinpath(tdir, "estgts.tre")
 writemultinewick(estgts, estgtfile)
 t0file = joinpath(tdir, "t0.tre")
-run(`$(astral) -v 0 -i "$(estgtfile)" -o $(t0file) -t $(Threads.nthreads())`)
+run(`$(astral) -v 0 -i "$(estgtfile)" -o $(t0file)`)
 t0 = readnewick(t0file)
 for E in t0.edge if E.length == -1. E.length = 0.0 end end
 rm(estgtfile)
@@ -129,7 +145,7 @@ estPL = SNaQ.compute_loss(search_net, q)
 
 @info "Saving data."
 outfile = "n$(ntaxa)-r$(repid)-$(density)-dens.out"
-outdir = joinpath(@__DIR__, "../data/out/")
+outdir = "/mnt/ws/home/nkolbow/TreechildGalledSimulations/data/out/"
 outdir = joinpath(outdir, "$(folder)")
 if !isdir(outdir) mkdir(outdir) end
 outdir = joinpath(outdir, "ils$(ils)")
