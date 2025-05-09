@@ -32,7 +32,7 @@ using Distributed
 # @everywhere Pkg.activate(joinpath(@__DIR__, ".."))
 
 @everywhere using Random, PhyloNetworks, SNaQ
-using CSV, DataFrames, PhyloCoalSimulations
+using CSV, DataFrames, PhyloCoalSimulations, StatsBase
 
 
 ################################
@@ -45,16 +45,16 @@ truenet = readnewick(readlines(joinpath(@__DIR__, "processed-n$(ntaxa)-$(density
 nhyb = truenet.numhybrids
 
 @info "Setting ILS."
-global targetmean::Float64 = ils == "low" ? 1.0 : ils == "high" ? 0.1 : error("ILS must be low or high.")
+global targetmean::Float64 = ils == "low" ? 2.0 : ils == "high" ? 0.5 : error("ILS must be low or high.")
 global sumE::Float64 = 0.0
 global nE::Int = 0
 for E in truenet.edge
     global nE, sumE
+    getchild(E).leaf && continue
     sumE += E.length == -1. ? 0.0 : E.length
-    nE += E.length == 1. ? 0.0 : nE
+    nE += E.length == -1. ? 0 : 1
 end
-obsmean::Float64 = sumE / nE
-global refactor::Float64 = targetmean / obsmean
+global refactor::Float64 = targetmean / (sumE / nE)
 for E in truenet.edge
     global refactor
     E.length = E.length == -1. ? -1. : E.length * refactor
@@ -100,6 +100,11 @@ else
 end
 
 
+@info "Computing GTEE."
+gtee = mean([hardwiredclusterdistance(tnet, enet, false) / (2*tnet.numtaxa-6) for (tnet, enet) in zip(gts, estgts)])
+@info "gtee = $(gtee) - $(gtee * (2*truenet.numtaxa-6))"
+
+
 @info "Counting qCFs."
 qstatic, _ = countquartetsintrees(estgts)
 
@@ -118,8 +123,20 @@ writemultinewick(estgts, estgtfile)
 t0file = joinpath(tdir, "t0.tre")
 run(`$(astral) -v 0 -i "$(estgtfile)" -o $(t0file)`)
 t0 = readnewick(t0file)
+for node in t0.node
+    if !node.leaf && !node.hybrid
+        node.name = ""
+    else
+        try
+            parse(Float64, node.name)
+            node.name = ""
+        catch e
+        end
+    end
+end
 for E in t0.edge if E.length == -1. E.length = 0.0 end end
 rm(estgtfile)
+@info "ASTRAL-IV starting topology: $(writenewick(t0, round=true))"
 
 
 @info "Collecting garbage everywhere."
@@ -132,7 +149,8 @@ rm(estgtfile)
 
 @info "Running `multi_search`."
 rt = @elapsed search_net, _ = multi_search(
-    t0, q, nhyb; runs=20, restrictions=SNaQ.restriction_set(; require_strongly_tree_child=true)
+    t0, q, nhyb; runs=20, restrictions=SNaQ.restriction_set(; require_strongly_tree_child=true),
+    prehybprob=0.0, preopt=false, maxequivPLs=1500
 )
 println("\tTook $(round(rt / 60, digits=2)) minutes.")
 
@@ -166,6 +184,7 @@ CSV.write(
         truePL=truePL,
         trueoptPL=trueoptPL,
         estPL=estPL,
+        gtee=gtee,
         rt=rt,
         ntaxa=ntaxa,
         repid=repid

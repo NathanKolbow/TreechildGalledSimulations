@@ -5,9 +5,9 @@ const NREPS = 25
 params = DataFrame(
     ntaxa = [10, 20, 20, 30, 30],
     lambda = [0.5, 0.5, 0.5, 0.5, 0.5],
-    nu = [0.04, 0.08, 0.175, 0.05, 0.05],
+    nu = [0.04, 0.08, 0.2, 0.05, 0.075],
     density = ["low", "low", "high", "low", "high"]
-)
+)   # n20 high: nu=0.175 gave 0.236 density
 @rput params
 R"set.seed(1234)"
 R"library(SiPhyNetwork)"
@@ -31,8 +31,8 @@ for (i, prow) in enumerate(eachrow(params))
     nets = []
     R"set.seed(1234)"
 
-    # Need to do this so that the n10 networks match what is
-    # currently in the file...
+    # Need to do this so that the n10 networks match what
+    # has already been generated...
     R"""
         nets <- sim.bdh.taxa.ssa(
             params$ntaxa[i], 50, params$lambda[i], 0, params$nu[1],

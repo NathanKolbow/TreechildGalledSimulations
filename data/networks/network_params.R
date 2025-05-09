@@ -7,7 +7,7 @@ library(tidyverse)
 
 lambdas <- c(0.5,0.6)
 nus <- c(0.0125,0.02,0.03,0.05,0.07,0.08)
-ntips<-c(10,20,30)
+ntips<-c(20)#,20,30)
 
 nreps<- 2000
 set.seed(1234)

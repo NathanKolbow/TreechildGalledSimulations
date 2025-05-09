@@ -1,7 +1,7 @@
 
 global ntot::Int = 0
 open("tcg.table", "w+") do f
-    for ntaxa in [10, 20, 30]
+    for ntaxa in [20] #[10, 20, 30]
         d = joinpath(@__DIR__, "..", "err", string(ntaxa))
         if !isdir(d) mkdir(d) end
         if !isdir(replace(d, "err" => "out")) mkdir(replace(d, "err" => "out")) end
@@ -37,7 +37,7 @@ open("tcg.table", "w+") do f
                         if !isdir(replace(d, "err" => "out")) mkdir(replace(d, "err" => "out")) end
                         if !isdir(replace(d, "err" => "log")) mkdir(replace(d, "err" => "log")) end
 
-                            for density in ["low", "high"]
+                            for density in ["low"]#["low", "high"]
                                 d = joinpath(@__DIR__, "..", "err", string(ntaxa), string(repid), ils, string(ngt), string(L), folder, density)
                                 if !isdir(d) mkdir(d) end
                                 if !isdir(replace(d, "err" => "out")) mkdir(replace(d, "err" => "out")) end

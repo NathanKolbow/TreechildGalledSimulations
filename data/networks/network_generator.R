@@ -3,7 +3,7 @@ library(tidyverse)
 
 # CHOICES: (lambda, nu)
 # n10, low density: (0.5, 0.03)
-# n10, high density: (0.5, 0.08)
+# n10, high density: NA / REMOVED
 #
 # n20, low density: (0.5, 0.02)
 # n20, high density: (0.6, 0.05)
@@ -22,25 +22,28 @@ library(tidyverse)
 
 set.seed(1234)
 params <- data.frame(
-    ntaxa = rep(c(10, 20, 30), each=2),
-    lambda = c(0.5, 0.5, 0.5, 0.6, 0.5, 0.6),
-    nu = c(0.03, 0.08, 0.02, 0.05, 0.0125, 0.03),
-    density = rep(c("low", "high"), 3)
+    ntaxa = c(10, 20, 20, 30, 30),
+    lambda = c(0.5, 0.5, 0.5, 0.5, 0.5),
+    nu = c(0.04, 0.05, 0.125, 0.05, 0.05),   # values further tweaked so that desire density is achieved AFTER the network_valiator.jl script
+    nsim = c(50, 50, 250, 100, 400),
+    density = c("low", "low", "high", "low", "high")
 ) %>%
-    mutate(filename = paste0("data/networks/treechild-galled/raw-n", ntaxa, "-", density, "-dens.netfile"))
+    mutate(filename = paste0("treechild-galled/raw-n", ntaxa, "-", density, "-dens.netfile"))
 nreps <- 25
 
-for(i in 1:nrow(params)) {
+#for(i in 1:nrow(params)) {
+for(i in c(3)) {
     nets <- sim.bdh.taxa.ssa(   # PLACEHOLDER LIST
             params$ntaxa[i], 50, params$lambda[i], 0, params$nu[1],
             hybprops = c(1, 1, 1),
             hyb.inher.fxn = make.beta.draw(10, 10)
         )
     neti <- 1
+    ntarget <- params$nsim[i]
 
-    while(length(nets) < 10*nreps) { # 10*nreps in case some networks aren't galled
+    while(length(nets) < ntarget) { # 10*nreps in case some networks aren't galled
         net <- sim.bdh.taxa.ssa(
-            params$ntaxa[i], 1, params$lambda[i], 0, params$nu[1],
+            params$ntaxa[i], 1, params$lambda[i], 0, params$nu[i],
             hybprops = c(1, 1, 1),
             hyb.inher.fxn = make.beta.draw(10, 10)
         )[[1]]
@@ -48,7 +51,9 @@ for(i in 1:nrow(params)) {
 
         nets[[neti]] <- net
         neti <- neti + 1
+        cat("\r", params$ntaxa[i], " ", params$density[i], ": ", neti-1, "/", ntarget)
     }
+    cat("\n")
     
     write.net(nets, params$filename[i])
 }
